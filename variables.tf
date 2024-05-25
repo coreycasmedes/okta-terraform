@@ -12,4 +12,5 @@ variable "okta_base_url" {
 variable "okta_api_token" {
   description = "The API token for your Okta organization."
   type        = string
+  sensitive   = true
 }
