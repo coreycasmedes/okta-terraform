@@ -1,11 +1,3 @@
-# resource "okta_auth_server" "openmetadata_authorization_server" {
-#   audiences   = ["api://example"]
-#   description = "My Example Auth Server"
-#   name        = "example"
-#   issuer_mode = "CUSTOM_URL"
-#   status      = "ACTIVE"
-# }
-
 resource "okta_app_oauth" "openmetadata_app" {
   label             = "Open Metadata test"
   type              = "browser" # For SPA apps use browser
@@ -13,17 +5,12 @@ resource "okta_app_oauth" "openmetadata_app" {
   response_types    = ["code", "token"]
   redirect_uris     = ["https://localhost:443/callback", "https://localhost:443/silent-callback"]
   login_uri         = "https://example.com/login"
-  enduser_note      = "Example App for OAuth2"
+  enduser_note      = "Open Metadata App for OAuth2"
   client_uri        = "https://example.com"
   token_endpoint_auth_method = "none"
   pkce_required = true
-#   logo_uri          = "https://example.com/logo.png"
-#   tos_uri           = "https://example.com/tos"
-#   policy_uri        = "https://example.com/policy"
-
   omit_secret       = true
   auto_key_rotation = true
-  
 }
 
 resource "okta_auth_server" "openmetadata_auth_server" {
@@ -38,8 +25,9 @@ resource "okta_auth_server_scope" "openmetadata_scope" {
     auth_server_id = okta_auth_server.openmetadata_auth_server.id
     consent = "IMPLICIT"
     default = true
-}
 
+    depends_on = [ okta_auth_server.okta_auth_server.openmetadata_auth_server ]
+}
 
 resource "okta_auth_server_claim_default" "openmetadata_claim_sub" {
     auth_server_id = okta_auth_server.openmetadata_auth_server.id
@@ -81,9 +69,9 @@ resource "okta_auth_server_policy_rule" "openmetdata_auth_server_policy_rule" {
     auth_server_id = okta_auth_server.openmetadata_auth_server.id
     policy_id = okta_auth_server_policy.openmetadata_auth_server_policy.id
     priority = 1
-    grant_type_whitelist = [ "client_credentials", "authorization_code" ]
+    grant_type_whitelist = [ "client_credentials", "authorization_code", "urn:ietf:params:oauth:grant-type:device_code" ]
     scope_whitelist = ["*"]
-    user_whitelist = [  ]
+    group_whitelist = ["EVERYONE"]
+
+    depends_on = [ okta_auth_server_policy.openmetadata_auth_server_policy ]
 }
-
-
